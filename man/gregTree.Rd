@@ -13,7 +13,7 @@ gregTree(y, x_sample, x_pop, pi = NULL, pi2 = NULL, var_est = FALSE,
 
 \item{x_sample}{A data frame of the auxiliary data in the sample.}
 
-\item{x_pop}{A data frame of population level auxiliary information.  It must contain the same names as x_sample.  If data_type = "raw", must contain unit level data.  If data_type = "totals" or "means", then contains one row of aggregated, population totals or means for the auxiliary data. Default is "raw".}
+\item{x_pop}{A data frame of population level auxiliary information. It must contain the same names as x_sample.}
 
 \item{pi}{A numeric vector of inclusion probabilities for each sampled unit in y.  If NULL, then simple random sampling without replacement is assumed.}
 
@@ -45,7 +45,7 @@ A list of output containing:
 }
 }
 \description{
-Calculates a regression tree estimator for a finite population mean/proportion or total based on sample data collected from a complex sampling design and auxiliary population data.
+Calculates a regression tree estimator for a finite population mean or total based on sample data collected from a complex sampling design and auxiliary population data.
 }
 \examples{
 library(survey)

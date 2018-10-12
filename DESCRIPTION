@@ -1,8 +1,9 @@
 Package: mase
 Type: Package
 Title: Model-Assisted Survey Estimators
-Version: 0.1.1
-Date: 2018-06-06
+Version: 0.1.2
+Date: 2018-10-12
+Encoding: UTF-8
 Authors@R: c(person("Kelly", "McConville", role = c("aut", "cre", "cph"), 
                     email = "mcconville@reed.edu"),
             person("Becky", "Tang", role = "aut"),
@@ -28,8 +29,8 @@ Description: A set of model-assisted survey estimators and corresponding
     <doi:10.1214/16-SS113>.
 License: GPL-2
 LazyData: TRUE
-Imports: MASS, glmnet, Matrix, foreach, survey, dplyr, magrittr, rpms,
-        boot, stats, Rdpack
+Imports: glmnet, Matrix, foreach, survey, dplyr, magrittr, rpms, boot,
+        stats, Rdpack
 Suggests: roxygen2, testthat
 Depends: R (>= 3.1)
 Collate: 'gregt.R' 'varMase.R' 'GREG.R' 'gregElasticNett.R'
@@ -37,10 +38,10 @@ Collate: 'gregt.R' 'varMase.R' 'GREG.R' 'gregElasticNett.R'
         'horvitzThompson.R' 'logisticGregElasticNett.R'
         'logisticGregt.R' 'postStratt.R' 'postStrat.R'
         'ratioEstimatort.R' 'ratioEstimator.R' 'treeDesignMatrix.R'
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 RdMacros: Rdpack
 NeedsCompilation: no
-Packaged: 2018-06-11 19:21:21 UTC; kswatmac
+Packaged: 2018-10-12 22:40:10 UTC; mcconville
 Author: Kelly McConville [aut, cre, cph],
   Becky Tang [aut],
   George Zhu [aut],
@@ -49,4 +50,4 @@ Author: Kelly McConville [aut, cre, cph],
   Daniell Toth [ctb, cph] (Author and copyright holder of
     treeDesignMatrix helper function)
 Repository: CRAN
-Date/Publication: 2018-06-14 18:33:03 UTC
+Date/Publication: 2018-10-12 23:00:03 UTC
