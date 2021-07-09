@@ -4,41 +4,47 @@
 \alias{ratioEstimator}
 \title{Compute a ratio estimator}
 \usage{
-ratioEstimator(y, x_sample, x_pop, data_type = "raw", pi = NULL,
-  N = NULL, pi2 = NULL, var_est = FALSE, var_method = "lin_HB",
-  B = 1000, strata = NULL)
+ratioEstimator(
+  y,
+  xsample,
+  xpop,
+  datatype = "raw",
+  pi = NULL,
+  N = NULL,
+  pi2 = NULL,
+  var_est = FALSE,
+  var_method = "LinHB",
+  B = 1000
+)
 }
 \arguments{
 \item{y}{A numeric vector of the sampled response variable.}
 
-\item{x_sample}{A numeric vector of the sampled auxiliary variable.}
+\item{xsample}{A numeric vector of the sampled auxiliary variable.}
 
-\item{x_pop}{A numeric vector of population level auxiliary information.  Must come in the form of raw data, population total or population mean.}
+\item{xpop}{A numeric vector of population level auxiliary information.  Must come in the form of raw data, population total or population mean.}
 
-\item{data_type}{A string that specifies the form of population auxiliary data. The possible values are "raw", "total" or "mean".  If data_type = "raw", then x_pop must contain a numeric vector of the auxiliary variable for each unit in the population. If data_type = "total" or "mean", then contains either the population total or population mean for the auxiliary variable.}
+\item{datatype}{A string that specifies the form of population auxiliary data. The possible values are "raw", "total" or "mean".  If datatype = "raw", then xpop must contain a numeric vector of the auxiliary variable for each unit in the population. If datatype = "total" or "mean", then contains either the population total or population mean for the auxiliary variable.}
 
 \item{pi}{A numeric vector of inclusion probabilities for each sampled unit in y.  If NULL, then simple random sampling without replacement is assumed.}
 
 \item{N}{A numeric value of the population size. If NULL, it is estimated with the sum of the inverse of the pis.}
 
-\item{pi2}{A square matrix of the joint inclusion probabilities.  Needed for the "lin_HT" variance estimator.}
+\item{pi2}{A square matrix of the joint inclusion probabilities.  Needed for the "LinHT" variance estimator.}
 
 \item{var_est}{A logical indicating whether or not to compute a variance estimator.  Default is FALSE.}
 
-\item{var_method}{The method to use when computing the variance estimator.  Options are a Taylor linearized technique: "lin_HB"= Hajek-Berger estimator, "lin_HH" = Hansen-Hurwitz estimator, "lin_HTSRS" = Horvitz-Thompson estimator under simple random sampling without replacement, and "lin_HT" = Horvitz-Thompson estimator or a resampling technique: "bootstrap_SRS" = bootstrap variance estimator under simple random sampling without replacement. The default is "lin_HB".}
+\item{var_method}{The method to use when computing the variance estimator.  Options are a Taylor linearized technique: "LinHB"= Hajek-Berger estimator, "LinHH" = Hansen-Hurwitz estimator, "LinHTSRS" = Horvitz-Thompson estimator under simple random sampling without replacement, and "LinHT" = Horvitz-Thompson estimator or a resampling technique: "bootstrapSRS" = bootstrap variance estimator under simple random sampling without replacement. The default is "LinHB".}
 
 \item{B}{The number of bootstrap samples if computing the bootstrap variance estimator.  Default is 1000.}
-
-\item{strata}{A factor vector of the stratum membership.  If NULL, all units are put into the same stratum.  Must have same length as y.}
 }
 \value{
-A list of output containing:
+List of output containing:
 \itemize{
-\item{pop_total: Estimate of population total}
-\item{pop_mean: Estimate of the population mean}
-\item{pop_total_var: Estimated variance of population total estimate}
-\item{pop_mean_var: Estimated variance of population mean estimate}
-\item{weights: Survey weights produced by ratio estimator}
+\item{pop_total:}{Estimate of population total}
+\item{pop_mean:}{Estimate of population mean}
+\item{pop_total_var:}{ Estimated variance of population total estimate}
+\item{pop_mean_var:}{ Estimated variance of population mean estimate}
 }
 }
 \description{
@@ -47,15 +53,12 @@ Calculates a ratio estimator for a finite population mean/proportion or total ba
 \examples{
 library(survey)
 data(api)
-ratioEstimator(y = apisrs$api00, x_sample = apisrs$meals, 
-x_pop = sum(apipop$meals), data_type = "total", pi = apisrs$pw^(-1), 
+ratioEstimator(y = apisrs$api00, xsample = apisrs$meals, 
+xpop = sum(apipop$meals), datatype = "total", pi = apisrs$pw^(-1), 
 N = dim(apipop)[1])
 
 }
 \references{
 \insertRef{coc77}{mase} 
 \insertRef{sar92}{mase}
-}
-\seealso{
-\code{\link{greg}} for a linear or logistic regression model.
 }

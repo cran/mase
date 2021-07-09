@@ -4,49 +4,57 @@
 \alias{greg}
 \title{Compute a generalized regression estimator}
 \usage{
-greg(y, x_sample, x_pop, pi = NULL, model = "linear", pi2 = NULL,
-  var_est = FALSE, var_method = "lin_HB", data_type = "raw",
-  N = NULL, model_select = FALSE, lambda = "lambda.min", B = 1000,
-  strata = NULL)
+greg(
+  y,
+  xsample,
+  xpop,
+  pi = NULL,
+  model = "linear",
+  pi2 = NULL,
+  var_est = FALSE,
+  var_method = "LinHB",
+  datatype = "raw",
+  N = NULL,
+  modelselect = FALSE,
+  lambda = "lambda.min",
+  B = 1000
+)
 }
 \arguments{
 \item{y}{A numeric vector of the sampled response variable.}
 
-\item{x_sample}{A data frame of the auxiliary data in the sample.}
+\item{xsample}{A data frame of the auxiliary data in the sample.}
 
-\item{x_pop}{A data frame of population level auxiliary information.  It must contain the same names as x_sample.  If data_type = "raw", must contain unit level data.  If data_type = "totals" or "means", then contains one row of aggregated, population totals or means for the auxiliary data. Default is "raw".}
+\item{xpop}{A data frame of population level auxiliary information.  It must contain the same names as xsample.  If datatype = "raw", must contain unit level data.  If datatype = "totals" or "means", then contains one row of aggregated, population totals or means for the auxiliary data. Default is "raw".}
 
 \item{pi}{A numeric vector of inclusion probabilities for each sampled unit in y.  If NULL, then simple random sampling without replacement is assumed.}
 
 \item{model}{A string that specifies the regression model to utilize. Options are "linear" or "logistic".}
 
-\item{pi2}{A square matrix of the joint inclusion probabilities.  Needed for the "lin_HT" variance estimator.}
+\item{pi2}{A square matrix of the joint inclusion probabilities.  Needed for the "LinHT" variance estimator.}
 
 \item{var_est}{A logical indicating whether or not to compute a variance estimator.  Default is FALSE.}
 
-\item{var_method}{The method to use when computing the variance estimator.  Options are a Taylor linearized technique: "lin_HB"= Hajek-Berger estimator, "lin_HH" = Hansen-Hurwitz estimator, "lin_HTSRS" = Horvitz-Thompson estimator under simple random sampling without replacement, and "lin_HT" = Horvitz-Thompson estimator or a resampling technique: "bootstrap_SRS" = bootstrap variance estimator under simple random sampling without replacement. The default is "lin_HB".}
+\item{var_method}{The method to use when computing the variance estimator.  Options are a Taylor linearized technique: "LinHB"= Hajek-Berger estimator, "LinHH" = Hansen-Hurwitz estimator, "LinHTSRS" = Horvitz-Thompson estimator under simple random sampling without replacement, and "LinHT" = Horvitz-Thompson estimator or a resampling technique: "bootstrapSRS" = bootstrap variance estimator under simple random sampling without replacement. The default is "LinHB".}
 
-\item{data_type}{A string that specifies the form of population auxiliary data. The possible values are "raw", "totals" or "means" for whether the user is providing population data at the unit level, aggregated to totals, or aggregated to means.  Default is "raw".}
+\item{datatype}{A string that specifies the form of population auxiliary data. The possible values are "raw", "totals" or "means" for whether the user is providing population data at the unit level, aggregated to totals, or aggregated to means.  Default is "raw".}
 
 \item{N}{A numeric value of the population size. If NULL, it is estimated with the sum of the inverse of the pis.}
 
-\item{model_select}{A logical for whether or not to run lasso regression first and then fit the model using only the predictors with non-zero lasso coefficients. Default is FALSE.}
+\item{modelselect}{A logical for whether or not to run lasso regression first and then fit the model using only the predictors with non-zero lasso coefficients. Default is FALSE.}
 
-\item{lambda}{A string specifying how to tune the lasso hyper-parameter.  Only used if model_select = TRUE and defaults to "lambda.min". The possible values are "lambda.min", which is the lambda value associated with the minimum cross validation error or "lambda.1se", which is the lambda value associated with a cross validation error that is one standard error away from the minimum, resulting in a smaller model.}
+\item{lambda}{A string specifying how to tune the lasso hyper-parameter.  Only used if modelselect = TRUE and defaults to "lambda.min". The possible values are "lambda.min", which is the lambda value associated with the minimum cross validation error or "lambda.1se", which is the lambda value associated with a cross validation error that is one standard error away from the minimum, resulting in a smaller model.}
 
 \item{B}{The number of bootstrap samples if computing the bootstrap variance estimator.  Default is 1000.}
-
-\item{strata}{A factor vector of the stratum membership.  If NULL, all units are put into the same stratum.  Must have same length as y.}
 }
 \value{
 A list of output containing:
 \itemize{
-\item{pop_total: Estimate of population total}
-\item{pop_mean: Estimate of the population mean}
-\item{pop_total_var: Estimated variance of population total estimate}
-\item{pop_mean_var: Estimated variance of population mean estimate}
-\item{weights: Survey weights produced by greg (linear model only)}
-\item{coefficients: Survey-weighted model coefficients}
+\item{pop_total:}{Estimate of population total}
+\item{pop_mean:}{Estimate of the population mean (or proportion)}
+\item{weights:}{Survey weights produced by GREG (linear model only)}
+\item{pop_total_var:}{Estimated variance of population total estimate}
+\item{pop_mean_var:}{Estimated variance of population mean estimate}
 }
 }
 \description{
@@ -55,22 +63,13 @@ Calculates a generalized regression estimator for a finite population mean/propo
 \examples{
 library(survey)
 data(api)
-greg(y = apisrs$api00, x_sample = apisrs[c("col.grad", "awards")], 
-x_pop = apipop[c("col.grad", "awards")], pi = apisrs$pw^(-1), 
+greg(y = apisrs$api00, xsample = apisrs[c("col.grad", "awards")], 
+xpop = apipop[c("col.grad", "awards")], pi = apisrs$pw^(-1), 
 var_est = TRUE)
-
-#To estimate a proportion
-y <- 0 + (apisrs$both == "Yes")
-greg(y = y, x_sample = apisrs[c("col.grad")], 
-x_pop = apipop[c("col.grad")], pi = apisrs$pw^(-1), 
-var_est = TRUE, model = "logistic")
 
 }
 \references{
 \insertRef{cas76}{mase}
 
 \insertRef{sar92}{mase}
-}
-\seealso{
-\code{\link{gregElasticNet}} for a penalized regression model.
 }
