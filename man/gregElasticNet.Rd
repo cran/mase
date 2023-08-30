@@ -18,7 +18,11 @@ gregElasticNet(
   N = NULL,
   lambda = "lambda.min",
   B = 1000,
-  cvfolds = 10
+  cvfolds = 10,
+  weights_method = "ridge",
+  eta = 1e-04,
+  fpc = T,
+  messages = T
 )
 }
 \arguments{
@@ -49,6 +53,14 @@ gregElasticNet(
 \item{B}{The number of bootstrap samples if computing the bootstrap variance estimator.  Default is 1000.}
 
 \item{cvfolds}{The number of folds for the cross-validation to tune lambda.}
+
+\item{weights_method}{A string specifying which method to use to calculate survey weights. Currently, "ridge" is the only option. The "ridge" method uses a ridge regression approximation to calculate weights (see McConville et al (2017), section 3.2 for details). Support for "calibration" to come soon, which employs the model calibration method of Wu and Sitter (2001).}
+
+\item{eta}{A small positive number. Defaults to 0.0001. See McConville et al (2017), section 3.2 for details.}
+
+\item{fpc}{Default to TRUE, logical for whether or not the variance calculation should include a finite population correction when calculating the "LinHTSRS" or the "SRSbootstrap" variance estimator.}
+
+\item{messages}{A logical indicating whether to output the messages internal to mase. Default is TRUE.}
 }
 \value{
 A list of output containing:
@@ -64,12 +76,19 @@ A list of output containing:
 Calculates a lasso, ridge or elastic net generalized regression estimator for a finite population mean/proportion or total based on sample data collected from a complex sampling design and auxiliary population data.
 }
 \examples{
-library(survey)
-data(api)
-gregElasticNet(y = apisrs$api00, 
-xsample = apisrs[c("col.grad", "awards", "snum", "dnum", "cnum", "pcttest", "meals", "sch.wide")], 
-xpop = apipop[c("col.grad", "awards", "snum", "dnum", "cnum", "pcttest", "meals", "sch.wide")], 
-pi = apisrs$pw^(-1), var_est = TRUE, alpha = .5)
+library(dplyr)
+data(IdahoPop)
+data(IdahoSamp)
+xsample <- filter(IdahoSamp, COUNTYFIPS == "16055")
+xpop <- filter(IdahoPop, COUNTYFIPS == "16055")
+gregElasticNet(y = xsample$BA_TPA_ADJ,
+               N = xpop$npixels,
+               xsample = xsample[c("tcc", "elev", "ppt", "tmean")],
+               xpop = xpop[c("tcc", "elev", "ppt", "tmean")],
+               var_est = TRUE,
+               var_method = "LinHB",
+               datatype = "means",
+               alpha = 0.5)
 
 }
 \references{

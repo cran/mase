@@ -2,17 +2,14 @@
 #helper function to compute an approximate variance estimator
 #Make flexible enough to work with and without the joint inclusion probabilities
 
-varMase <- function(y, pi, pi2 = NULL, method = "LinHB", N = NULL){
+varMase <- function(y, pi, pi2 = NULL, method = "LinHB", N = NULL, fpc = T){
   
   #Need sample size
   n <- length(y)
   
-  
-
   #Make sure include pi2 if method is LinHT
   if(method=="LinHT" & is.null(pi2)){
-    message("For LinHT variance estimator, need to provide second order inclusion probabilities matrix.")
-    return(NULL)
+    stop("For LinHT variance estimator, need to provide second order inclusion probabilities matrix.")
   }
   
   #Need to add warning messages for if pi2 is not given for LinHT or is wrong dim!
@@ -31,7 +28,16 @@ varMase <- function(y, pi, pi2 = NULL, method = "LinHB", N = NULL){
     if(is.null(N)){
       N <- sum(pi^(-1))
     }
-    varEst <- (N-n)*(N/n)*var(y)
+    
+    #varEst <- (N-n)*(N/n)*var(y)
+    
+    if(fpc == TRUE){
+      varEst <- (N-n)*(N/n)*var(y)
+    }
+    if(fpc == FALSE | is.null(fpc)){
+      varEst <- (N^2/n)*var(y)
+    }
+        
   }
   if(method== "LinHT"){
     a <- (pi2 - pi%*%t(pi))*pi2^(-1)*(pi%*%t(pi))^(-1)*y%*%t(y)

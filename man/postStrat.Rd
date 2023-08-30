@@ -11,10 +11,12 @@ postStrat(
   pi = NULL,
   N = NULL,
   var_est = FALSE,
-  var_method = "HB",
+  var_method = "LinHB",
   pi2 = NULL,
   datatype = "raw",
-  B = 1000
+  B = 1000,
+  fpc = TRUE,
+  messages = T
 )
 }
 \arguments{
@@ -37,6 +39,10 @@ postStrat(
 \item{datatype}{Default to "raw", takes values "raw", "totals" or "means" for whether the user is providing the raw population stratum memberships, the population totals of each stratum, or the population proportions of each stratum.}
 
 \item{B}{The number of bootstrap samples if computing the bootstrap variance estimator.  Default is 1000.}
+
+\item{fpc}{Default to TRUE, logical for whether or not the variance calculation should include a finite population correction when calculating the "LinHTSRS", "SRSunconditional", or the "SRSbootstrap" variance estimator.}
+
+\item{messages}{A logical indicating whether to output the messages internal to mase. Default is TRUE.}
 }
 \value{
 A list of output containing:
@@ -46,19 +52,34 @@ A list of output containing:
 \item{pop_total_var:}{Estimated variance of population total estimate}
 \item{pop_mean_var:}{Estimated variance of population mean estimate}
 \item{strat_ests:}{Table of total and mean estimates for each strata}
-\item{weights.ps:}{Survey weights produced by PS}
+\item{weights:}{Survey weights produced by PS}
 }
 }
 \description{
-Calculates a generalized regression estimator for a finite population mean/proportion or total based on sample data collected from a complex sampling design and auxiliary population data.
+Calculates a post-stratified estimator for a finite population mean/proportion or total based on sample data collected from a complex sampling design and a single, categorical auxiliary population variable.
 }
 \examples{
-library(survey)
-data(api) 
-postStrat(y = apisrs$api00, xsample = apisrs$awards, 
-xpop = data.frame(table(apipop$awards)), datatype = "totals", 
-pi = apisrs$pw^(-1))
+library(tidyr)
+library(dplyr)
 
+data(IdahoPop)
+data(IdahoSamp)
+
+xsample <- filter(IdahoSamp, COUNTYFIPS == "16055")
+xpop <- filter(IdahoPop, COUNTYFIPS == "16055")
+
+pop <- xpop[c("tnt.1", "tnt.2")] |> 
+    pivot_longer(everything(), names_to = "tnt", values_to = "prop") |>
+    mutate(tnt = as.numeric(gsub("\\\\D", "", tnt)))
+    
+postStrat(y = xsample$BA_TPA_ADJ,
+          N = xpop$npixels,
+          xsample = xsample$tnt,
+          xpop = pop,
+          datatype = "means",
+          var_est = TRUE,
+          var_method = "SRSunconditional")
+          
 }
 \references{
 \insertRef{coc77}{mase} 

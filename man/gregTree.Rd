@@ -15,7 +15,9 @@ gregTree(
   B = 1000,
   pval = 0.05,
   perm_reps = 500,
-  bin_size = NULL
+  bin_size = NULL,
+  fpc = T,
+  messages = T
 )
 }
 \arguments{
@@ -40,6 +42,10 @@ gregTree(
 \item{perm_reps}{An integer specifying the number of permutations for each permutation test run to fit the regression tree. Default value is 500.}
 
 \item{bin_size}{A integer specifying the minimum number of observations in each node.}
+
+\item{fpc}{Default to TRUE, logical for whether or not the variance calculation should include a finite population correction when calculating the "LinHTSRS" or the "SRSbootstrap" variance estimator.}
+
+\item{messages}{A logical indicating whether to output the messages internal to mase. Default is TRUE.}
 }
 \value{
 A list of output containing:
@@ -55,11 +61,17 @@ A list of output containing:
 Calculates a regression tree estimator for a finite population mean/proportion or total based on sample data collected from a complex sampling design and auxiliary population data.
 }
 \examples{
-library(survey)
-data(api)
-gregTree(y = apisrs$api00, 
-xsample = apisrs[c("col.grad", "awards", "snum", "dnum", "cnum", "pcttest", "meals", "sch.wide")], 
-xpop = apipop[c("col.grad", "awards", "snum", "dnum", "cnum", "pcttest", "meals", "sch.wide")])
+library(dplyr)
+data(IdahoPop)
+data(IdahoSamp)
+
+xsample <- filter(IdahoSamp, COUNTYFIPS == "16055") 
+xpop <- filter(IdahoSamp, COUNTYFIPS == "16055")
+
+gregTree(y = xsample$BA_TPA_ADJ,
+         xsample = xsample[c("tcc", "elev")],
+         xpop = xpop[c("tcc", "elev")],
+         var_est = TRUE)
 
 }
 \references{

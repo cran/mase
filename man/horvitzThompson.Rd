@@ -11,7 +11,9 @@ horvitzThompson(
   pi2 = NULL,
   var_est = FALSE,
   var_method = "LinHB",
-  B = 1000
+  B = 1000,
+  fpc = T,
+  messages = T
 )
 }
 \arguments{
@@ -28,6 +30,10 @@ horvitzThompson(
 \item{var_method}{The method to use when computing the variance estimator.  Options are a Taylor linearized technique: "LinHB"= Hajek-Berger estimator, "LinHH" = Hansen-Hurwitz estimator, "LinHTSRS" = Horvitz-Thompson estimator under simple random sampling without replacement, and "LinHT" = Horvitz-Thompson estimator or a resampling technique: "bootstrapSRS" = bootstrap variance estimator under simple random sampling without replacement. The default is "LinHB".}
 
 \item{B}{The number of bootstrap samples if computing the bootstrap variance estimator.  Default is 1000.}
+
+\item{fpc}{Default to TRUE, logical for whether or not the variance calculation should include a finite population correction when calculating the "LinHTSRS" or the "SRSbootstrap" variance estimator.}
+
+\item{messages}{A logical indicating whether to output the messages internal to mase. Default is TRUE.}
 }
 \value{
 List of output containing:
@@ -42,10 +48,16 @@ List of output containing:
 Calculate the Horvitz-Thompson Estimator for a finite population mean/proportion or total based on sample data collected from a complex sampling design.
 }
 \examples{
-library(survey)
-data(api)
-horvitzThompson(y = apisrs$api00, pi = apisrs$pw^(-1))
-horvitzThompson(y = apisrs$api00, pi = apisrs$pw^(-1), var_est = TRUE, var_method = "LinHTSRS")
+library(dplyr)
+data(IdahoSamp)
+data(IdahoPop)
+xsample <- filter(IdahoSamp, COUNTYFIPS == "16055")
+xpop <- filter(IdahoPop, COUNTYFIPS == "16055") 
+
+horvitzThompson(y = xsample$BA_TPA_ADJ,
+                N = xpop$npixels,
+                var_est = TRUE,
+                var_method = "LinHTSRS")
 
 }
 \references{

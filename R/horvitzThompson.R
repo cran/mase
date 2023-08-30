@@ -9,12 +9,20 @@
 #' @param var_method The method to use when computing the variance estimator.  Options are a Taylor linearized technique: "LinHB"= Hajek-Berger estimator, "LinHH" = Hansen-Hurwitz estimator, "LinHTSRS" = Horvitz-Thompson estimator under simple random sampling without replacement, and "LinHT" = Horvitz-Thompson estimator or a resampling technique: "bootstrapSRS" = bootstrap variance estimator under simple random sampling without replacement. The default is "LinHB".
 #' @param pi2 A square matrix of the joint inclusion probabilities.  Needed for the "LinHT" variance estimator.
 #' @param B The number of bootstrap samples if computing the bootstrap variance estimator.  Default is 1000.
+#' @param fpc Default to TRUE, logical for whether or not the variance calculation should include a finite population correction when calculating the "LinHTSRS" or the "SRSbootstrap" variance estimator.
+#' @param messages A logical indicating whether to output the messages internal to mase. Default is TRUE.
 #' 
 #' @examples 
-#' library(survey)
-#' data(api)
-#' horvitzThompson(y = apisrs$api00, pi = apisrs$pw^(-1))
-#' horvitzThompson(y = apisrs$api00, pi = apisrs$pw^(-1), var_est = TRUE, var_method = "LinHTSRS")
+#' library(dplyr)
+#' data(IdahoSamp)
+#' data(IdahoPop)
+#' xsample <- filter(IdahoSamp, COUNTYFIPS == "16055")
+#' xpop <- filter(IdahoPop, COUNTYFIPS == "16055") 
+#' 
+#' horvitzThompson(y = xsample$BA_TPA_ADJ,
+#'                 N = xpop$npixels,
+#'                 var_est = TRUE,
+#'                 var_method = "LinHTSRS")
 #'
 #'@references{
 #'\insertRef{hor52}{mase}
@@ -33,52 +41,47 @@
 #' @include varMase.R
 #' @include htt.R
 #'
-horvitzThompson <- function(y, pi = NULL, N = NULL, pi2 = NULL, var_est =FALSE, var_method="LinHB", B = 1000) {
+horvitzThompson <- function(y,
+                            pi = NULL,
+                            N = NULL,
+                            pi2 = NULL,
+                            var_est = FALSE,
+                            var_method = "LinHB",
+                            B = 1000,
+                            fpc = T,
+                            messages = T) {
 
-  ### INPUT VALIDATION ###
-  
-  #Make sure the var_method is valid
-  if(!is.element(var_method, c("LinHB", "LinHH", "LinHTSRS", "LinHT", "bootstrapSRS"))){
-    message("Variance method input incorrect. It has to be \"LinHB\", \"LinHH\", \"LinHT\", \"LinHTSRS\", or \"bootstrapSRS\".")
-    return(NULL)
+  if (!is.element(var_method, c("LinHB", "LinHH", "LinHTSRS", "LinHT", "bootstrapSRS"))) {
+    stop("Variance method input incorrect. It has to be \"LinHB\", \"LinHH\", \"LinHT\", \"LinHTSRS\", or \"bootstrapSRS\".")
   }
 
-  #Check that y is numeric
-  if(!(typeof(y) %in% c("numeric", "integer", "double"))){
+  if (!(typeof(y) %in% c("numeric", "integer", "double"))) {
     stop("Must supply numeric y.  For binary variable, convert to 0/1's.")
   }
   
-  
-  
-  if(is.null(pi) && is.null(N)){
+  if (is.null(pi) && is.null(N)) {
     stop("Must supply either ", sQuote("pi")," or ", sQuote("N"))
     
   }
   
-  if(is.null(pi)){
-    message("Assuming simple random sampling")
+  if (is.null(pi)) {
+    if (messages) {
+      message("Assuming simple random sampling") 
+    }
   }  
   
-    
-  # convert pi into diagonal matrix format
   if (is.null(pi)) {
     pi <- rep(length(y)/N, length(y))
   }
   
-  #weight: inverse first order inclusion probabilities
   weight <- pi^(-1)
   
   #Sample size
   n <- length(y)
   
-  
-##########################
-  
   # total population
   total <- as.vector(t(y) %*% weight)
   
-  # defining estimate for population size if N is unknown, otherwise use
-  # known N.
   if (is.null(N)) {
     N <- sum(weight)
     mu <- as.vector(total * (1/N))
@@ -86,27 +89,34 @@ horvitzThompson <- function(y, pi = NULL, N = NULL, pi2 = NULL, var_est =FALSE, 
     mu <- as.vector((total/N))
   }
   
-  if(var_est==TRUE){
-    if(var_method!="bootstrapSRS"){
-    varEst <- varMase(y = y,pi = pi,pi2 = pi2,method = var_method, N = N)
-
-    }else{
+  if (var_est == TRUE) {
+    
+    if (var_method != "bootstrapSRS") {
+      varEst <- varMase(y = y, pi = pi,pi2 = pi2,method = var_method, N = N)
+    } else {
       #Find bootstrap variance
       dat <- cbind(y,pi)
       #Bootstrap total estimates
       t_boot <- boot(data = dat, statistic = htt, R = B)
       
-      #Adjust for bias and without replacement sampling
-      varEst <- var(t_boot$t)*n/(n-1)*(N-n)/(N-1)
+      if (fpc == TRUE) {
+        varEst <- var(t_boot$t)*n/(n-1)*(N-n)/(N-1) 
+      }
+      if (fpc == FALSE) {
+        varEst <- var(t_boot$t)*n/(n-1)
+      }
+      
     }
     
-    #return estimates and variance estimates
     varEstMu <- varEst*N^(-2)
-    return(list(pop_total = total, pop_mean = mu, pop_total_var=varEst, pop_mean_var = varEstMu))
     
-  }else{
-  
-  # return estimates
-  return(list(pop_total = total, pop_mean = mu))
+    return(list(pop_total = total,
+                pop_mean = mu, 
+                pop_total_var = varEst,
+                pop_mean_var = varEstMu))
+    
+  } else {
+    return(list(pop_total = total,
+                pop_mean = mu))
   }
 }
