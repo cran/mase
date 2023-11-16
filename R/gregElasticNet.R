@@ -28,17 +28,22 @@
 
 #' 
 #' @references 
-#'\insertRef{mcc17}{mase}
+#' \insertRef{mcc17}{mase}
 
 #'
-#' @return A list of output containing:
-#' \itemize{
-#' \item{pop_total:}{Estimate of population total}
-#' \item{coefficients:} {Elastic net coefficient estimates}
-#' \item{pop_mean:}{Estimate of the population mean (or proportion)}
-#' \item{pop_total_var:}{Estimated variance of population total estimate}
-#' \item{pop_mean_var:}{Estimated variance of population mean estimate}
-#' } 
+#' @return 
+#' A list of output containing:
+#' 
+#' * pop_total: Estimate of population total.
+#' 
+#' * coefficients: Elastic net coefficient estimates.
+#' 
+#' * pop_mean: Estimate of the population mean (or proportion).
+#' 
+#' * pop_total_var: Estimated variance of population total estimate.
+#' 
+#' * pop_mean_var:Estimated variance of population mean estimate.
+#' 
 #' @import boot
 #' @import glmnet
 #' @importFrom stats model.matrix predict quasibinomial var
@@ -62,8 +67,8 @@ gregElasticNet  <- function(y,
                             cvfolds = 10,
                             weights_method = "ridge",
                             eta = 0.0001,
-                            fpc = T,
-                            messages = T){
+                            fpc = TRUE,
+                            messages = TRUE){
   
   if (!(typeof(y) %in% c("numeric", "integer", "double"))) {
     stop("Must supply numeric y.  For binary variable, convert to 0/1's.")
@@ -150,7 +155,7 @@ gregElasticNet  <- function(y,
     }
     
     xpop <- data.frame(model.matrix(~., data = xpop))[,-1]
-    xpop <- dplyr::select_(xpop, .dots=names(xsample))
+    xpop <- dplyr::select(xpop, names(xsample))
     xpop_d <- model.matrix(~., data = xpop)
     
     #Total estimate
@@ -187,7 +192,7 @@ gregElasticNet  <- function(y,
   
     if (datatype == "raw") {
       xpop <- data.frame(model.matrix(~., data = xpop))[, -1]
-      xpop <- dplyr::select_(xpop, .dots=names(xsample))
+      xpop <- dplyr::select(xpop, names(xsample))
       xpop_d <- model.matrix(~., data = xpop)
       xpop_d <- apply(xpop_d,2,sum)
     }

@@ -1,8 +1,8 @@
 Package: mase
 Type: Package
 Title: Model-Assisted Survey Estimators
-Version: 0.1.4
-Date: 2023-08-21
+Version: 0.1.5
+Date: 2023-11-15
 Encoding: UTF-8
 Authors@R: c(person("Kelly", "McConville", role = c("cre", "aut", "cph"),
                     email = "kmcconville@fas.harvard.edu"),
@@ -29,21 +29,24 @@ Description: A set of model-assisted survey estimators and corresponding
     bootstrap variance estimator is presented in Mashreghi et al. (2016) 
     <doi:10.1214/16-SS113>.
 License: GPL-2
-Imports: glmnet, survey, dplyr, tidyr, rpms, boot, stats, Rdpack
+Imports: glmnet, survey, dplyr, tidyr, rpms, boot, stats, Rdpack,
+        ellipsis, Rcpp
 Suggests: roxygen2, testthat (>= 3.0.0), knitr, rmarkdown
 Depends: R (>= 4.1.0)
 Collate: 'gregt.R' 'varMase.R' 'GREG.R' 'IdahoPop.R' 'IdahoSamp.R'
-        'gregElasticNett.R' 'gregElasticNet.R' 'gregTree.R'
-        'gregtreet.R' 'htt.R' 'horvitzThompson.R'
-        'logisticGregElasticNett.R' 'logisticGregt.R' 'modifiedGreg.R'
-        'modifiedGregt.R' 'modifiedLogisticGregt.R' 'postStratt.R'
-        'postStrat.R' 'ratio.R' 'ratioEstimatort.R' 'ratioEstimator.R'
+        'RcppExports.R' 'gregElasticNett.R' 'gregElasticNet.R'
+        'gregTree.R' 'gregtreet.R' 'htt.R' 'horvitzThompson.R'
+        'logisticGregElasticNett.R' 'logisticGregt.R' 'mase-package.R'
+        'modifiedGreg.R' 'modifiedGregt.R' 'modifiedLogisticGregt.R'
+        'postStratt.R' 'postStrat.R' 'ratio.R' 'ratioEstimatort.R'
+        'ratioEstimator.R'
 RoxygenNote: 7.2.3
 RdMacros: Rdpack
 Config/testthat/edition: 3
 LazyData: true
-NeedsCompilation: no
-Packaged: 2023-08-24 18:44:46 UTC; joshuayamamoto
+LinkingTo: Rcpp, RcppEigen
+NeedsCompilation: yes
+Packaged: 2023-11-16 16:23:09 UTC; joshuayamamoto
 Author: Kelly McConville [cre, aut, cph],
   Josh Yamamoto [aut],
   Becky Tang [aut],
@@ -52,4 +55,4 @@ Author: Kelly McConville [cre, aut, cph],
   Shirley Chueng [ctb],
   Daniell Toth [ctb]
 Repository: CRAN
-Date/Publication: 2023-08-30 16:50:09 UTC
+Date/Publication: 2023-11-16 17:30:02 UTC

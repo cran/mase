@@ -21,17 +21,21 @@
 #'                datatype = "means",
 #'                N = xpop$npixels)
 #' 
-#'@references 
-#'\insertRef{coc77}{mase} 
-#'\insertRef{sar92}{mase}
+#' @references 
+#' \insertRef{coc77}{mase} 
+#' \insertRef{sar92}{mase}
 #'
-#' @return List of output containing:
-#' \itemize{
-#' \item{pop_total:}{Estimate of population total}
-#' \item{pop_mean:}{Estimate of population mean}
-#' \item{pop_total_var:}{ Estimated variance of population total estimate}
-#' \item{pop_mean_var:}{ Estimated variance of population mean estimate}
-#' }
+#' @returns 
+#' List of output containing:
+#' 
+#' * pop_total: Estimate of population total.
+#' 
+#' * pop_mean: Estimate of population mean.
+#' 
+#' * pop_total_var: Estimated variance of population total estimate.
+#' 
+#' * pop_mean_var: Estimated variance of population mean estimate.
+#' 
 #' 
 #' @export ratioEstimator
 #' @import boot
@@ -49,8 +53,8 @@ ratioEstimator <- function(y,
                            var_est = FALSE,
                            var_method = "LinHB",
                            B = 1000,
-                           fpc = T,
-                           messages = T) {
+                           fpc = TRUE,
+                           messages = TRUE) {
 
   if (!(typeof(y) %in% c("numeric", "integer", "double"))) {
     stop("Must supply numeric y.  For binary variable, convert to 0/1's.")

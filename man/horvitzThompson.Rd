@@ -12,8 +12,8 @@ horvitzThompson(
   var_est = FALSE,
   var_method = "LinHB",
   B = 1000,
-  fpc = T,
-  messages = T
+  fpc = TRUE,
+  messages = TRUE
 )
 }
 \arguments{
@@ -37,12 +37,14 @@ horvitzThompson(
 }
 \value{
 List of output containing:
-\itemize{
-\item{pop_total:}{Estimate of population total}
-\item{pop_mean:}{Estimate of population mean}
-\item{pop_total_var:}{ Estimated variance of population total estimate}
-\item{pop_mean_var:}{ Estimated variance of population mean estimate}
-}
+
+* pop_total: Estimate of population total.
+
+* pop_mean: Estimate of population mean.
+
+* pop_total_var: Estimated variance of population total estimate.
+
+* pop_mean_var: Estimated variance of population mean estimate.
 }
 \description{
 Calculate the Horvitz-Thompson Estimator for a finite population mean/proportion or total based on sample data collected from a complex sampling design.
@@ -61,7 +63,5 @@ horvitzThompson(y = xsample$BA_TPA_ADJ,
 
 }
 \references{
-{
 \insertRef{hor52}{mase}
-}
 }

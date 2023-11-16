@@ -26,19 +26,24 @@
 #'      var_method = "LinHB",
 #'      datatype = "means")
 #' 
-#'@references 
-#'\insertRef{cas76}{mase}
+#' @references 
+#' \insertRef{cas76}{mase}
 #'
-#'\insertRef{sar92}{mase}
+#' \insertRef{sar92}{mase}
 #' 
-#' @return A list of output containing:
-#' \itemize{
-#' \item{pop_total:}{Estimate of population total}
-#' \item{pop_mean:}{Estimate of the population mean (or proportion)}
-#' \item{weights:}{Survey weights produced by GREG (linear model only)}
-#' \item{pop_total_var:}{Estimated variance of population total estimate}
-#' \item{pop_mean_var:}{Estimated variance of population mean estimate}
-#' }
+#' @return 
+#' A list of output containing:
+#' 
+#' * pop_total: Estimate of population total.
+#' 
+#' * pop_mean: Estimate of the population mean (or proportion).
+#' 
+#' * weights: Survey weights produced by GREG (linear model only).
+#' 
+#' * pop_total_var: Estimated variance of population total estimate.
+#' 
+#' * pop_mean_var: Estimated variance of population mean estimate.
+#' 
 #' 
 #' @export greg
 #' @import survey
@@ -61,8 +66,8 @@ greg  <- function(y,
                   modelselect = FALSE,
                   lambda = "lambda.min",
                   B = 1000,
-                  fpc = T,
-                  messages = T){
+                  fpc = TRUE,
+                  messages = TRUE){
   
   if (!(typeof(y) %in% c("numeric", "integer", "double"))) {
     stop("Must supply numeric y.  For binary variable, convert to 0/1's.")
@@ -95,8 +100,7 @@ greg  <- function(y,
     }
   }
   
-  #Convert y to a vector
-  y <- as.vector(y)
+  y <- as.numeric(y)
   
   #sample size
   n <- length(y)
@@ -280,22 +284,23 @@ greg  <- function(y,
       xpop_d <- unlist(c(N, xpop[names(xsample)]*N))
     }
     
-    w <- as.matrix(
-      1 + t(as.matrix(xpop_d) - xsample.dt %*% weight) %*% 
-        solve(xsample.dt %*% diag(weight) %*% xsample.d) %*% 
-        (xsample.dt)) %*% 
-      diag(weight)
+    one_mat <- matrix(rep(1, times = nrow(xsample.d)), nrow = 1)
+    xpop_cpp <- as.matrix(xpop_d)
+    weight_mat <- diag(weight)
+    
+    w <- get_weights(xpop_cpp, xsample.d, weight_mat, one_mat)
 
   #calculating the total estimate for y
-  t <- w %*% y
+  t <- sum(as.numeric(w) * y)
+  # t <- w %*% y
 
   #Coefficients
-  coefs <- solve(xsample.dt %*% diag(weight) %*% xsample.d) %*% (xsample.dt) %*% diag(weight) %*% y
+  coefs <- get_coefs(xsample.d, as.vector(y), weight_mat)
   
   if (var_est == TRUE) {
     
     if (var_method!="bootstrapSRS") {
-      y.hat <- xsample.d %*% (solve(xsample.dt %*% diag(weight) %*% xsample.d) %*% (xsample.dt) %*% diag(weight)%*%y)
+      y.hat <- xsample.d %*% coefs
       e <- y - y.hat
       varEst <- varMase(y = e,
                         pi = pi,

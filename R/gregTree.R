@@ -21,18 +21,23 @@
 #'          xpop = xpop[c("tcc", "elev")],
 #'          var_est = TRUE)
 #' 
-#'@references 
-#'\insertRef{mcc17b}{mase}
+#' @references 
+#' \insertRef{mcc17b}{mase}
 
 #' 
-#' @return A list of output containing:
-#' \itemize{
-#' \item{pop_total:}{Estimate of population total}
-#' \item{pop_mean:}{Estimate of the population mean (or proportion)}
-#' \item{weights:}{Survey weights produced by gregTree}
-#' \item{pop_total_var:}{Estimated variance of population total estimate}
-#' \item{pop_mean_var:}{Estimated variance of population mean estimate}
-#' }
+#' @return 
+#' A list of output containing:
+#'
+#' * pop_total: Estimate of population total.
+#' 
+#' * pop_mean: Estimate of the population mean (or proportion).
+#' 
+#' * weights: Survey weights produced by gregTree.
+#' 
+#' * pop_total_var: Estimated variance of population total estimate.
+#' 
+#' * pop_mean_var: Estimated variance of population mean estimate.
+#' 
 #' 
 #' @export gregTree
 #' @import rpms
@@ -52,8 +57,8 @@ gregTree  <- function(y,
                       pval = 0.05,
                       perm_reps = 500,
                       bin_size = NULL,
-                      fpc = T,
-                      messages = T){
+                      fpc = TRUE,
+                      messages = TRUE){
 
   if (!is.element(var_method, c("LinHB", "LinHH", "LinHTSRS", "LinHT", "bootstrapSRS"))) {
     stop("Variance method input incorrect. It has to be \"LinHB\", \"LinHH\", \"LinHT\", \"LinHTSRS\", or \"bootstrapSRS\".")

@@ -1,9 +1,15 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Development Mode
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/mcconvil/mase/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mcconvil/mase/actions/workflows/R-CMD-check.yaml)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/mase)](https://CRAN.R-project.org/package=mase)
+<!-- badges: end -->
 
-mase is still under development. Please use at your own risk!
+## Development Mode
+
+`mase` is still under development. Please use at your own risk!
 
 # mase
 
@@ -25,7 +31,15 @@ The available estimators are currently:
 
 ## Installation
 
-You can install `mase` from github with:
+Install the latest CRAN release with:
+
+``` r
+install.packages("mase")
+library(mase)
+```
+
+You can also install the developmental version of `mase` from GitHub
+with:
 
 ``` r
 # install.packages("devtools")
@@ -129,8 +143,5 @@ and the coefficients for the model
 ``` r
 greg_est[6]
 #> $coefficients
-#>                     [,1]
-#> (Intercept) -30.26159045
-#> tcc           0.79210774
-#> elev          0.09679431
+#> [1] -30.26159045   0.79210774   0.09679431
 ```
