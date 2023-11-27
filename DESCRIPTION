@@ -1,8 +1,8 @@
 Package: mase
 Type: Package
 Title: Model-Assisted Survey Estimators
-Version: 0.1.5
-Date: 2023-11-15
+Version: 0.1.5.1
+Date: 2023-11-27
 Encoding: UTF-8
 Authors@R: c(person("Kelly", "McConville", role = c("cre", "aut", "cph"),
                     email = "kmcconville@fas.harvard.edu"),
@@ -46,7 +46,7 @@ Config/testthat/edition: 3
 LazyData: true
 LinkingTo: Rcpp, RcppEigen
 NeedsCompilation: yes
-Packaged: 2023-11-16 16:23:09 UTC; joshuayamamoto
+Packaged: 2023-11-27 21:20:23 UTC; joshuayamamoto
 Author: Kelly McConville [cre, aut, cph],
   Josh Yamamoto [aut],
   Becky Tang [aut],
@@ -55,4 +55,4 @@ Author: Kelly McConville [cre, aut, cph],
   Shirley Chueng [ctb],
   Daniell Toth [ctb]
 Repository: CRAN
-Date/Publication: 2023-11-16 17:30:02 UTC
+Date/Publication: 2023-11-27 21:50:02 UTC
