@@ -82,6 +82,18 @@ modifiedGreg <- function(y,
     stop("datatype input incorrect, has to be either \"raw\", \"totals\" or \"means\"")
   }
   
+  if (datatype != "raw" && !("N" %in% names(xpop))) {
+    stop("xpop must contain a column for population size by domain called 'N' when datatype != raw.")
+  }
+  
+  if (length(domains) != length(y)) {
+    stop("'y' must be the same length as 'domains'")
+  }
+  
+  if (sum(is.na(y)) > 0) {
+    stop("'y' cannot contain any NA values")
+  }
+  
   if (is.null(N)) {
     if (datatype == "raw") {
       N <- nrow(xpop)
@@ -91,11 +103,7 @@ modifiedGreg <- function(y,
   }
   
   if (!is.null(N) && datatype != "raw"  && sum(xpop$N) != N) {
-    stop("User inputted N does not equal the sum of the domain level population sizes in xpop.")
-  }
-  
-  if (datatype != "raw" && !("N" %in% names(xpop))) {
-    stop("xpop must contain a column for population size by domain called 'N' when datatype != raw.")
+    warning("User inputted N does not equal the sum of the domain level population sizes in xpop.")
   }
   
   if (!all(names(xsample) %in% names(xpop))) {
@@ -109,7 +117,6 @@ modifiedGreg <- function(y,
   } else if (is.element(datatype, c("means", "totals")) && (ncol_diff != 2)) {
     stop("Incorrect number of columns in either xpop or xsample. When datatype != \"raw\" xpop should only contain columns with the same names as xsample as well as column with the domains and a column with the population sizes.")
   }
-  
 
   if (is.null(domain_col_name)) {
     
@@ -127,20 +134,18 @@ modifiedGreg <- function(y,
   
   pop_unique_domains <- unique(xpop[[domain_col_name]])
   samp_unique_domains <- unique(domains)
+  samp_unique_domains <- samp_unique_domains[!is.na(samp_unique_domains)]
   
-  if (!setequal(pop_unique_domains, samp_unique_domains)) {
-    stop("`domains` must contain all the same unique domain values as xpop  ")
+  if (!base::setequal(pop_unique_domains, samp_unique_domains)) {
+    stop("`domains` must contain all the same unique domain values as xpop")
   }
 
   if (is.null(pi)) {
     if (messages) {
       message("Assuming simple random sampling")
     }
-  } 
-  
-  if (is.null(pi)) {
     pi <- rep(length(y)/N, length(y))
-  }
+  } 
   
   weight <- as.vector(pi^(-1))
   
@@ -149,7 +154,7 @@ modifiedGreg <- function(y,
   }
   
   # creating a vector of common auxiliary variable names
-  common_pred_vars <- intersect(names(xsample), names(xpop))
+  common_pred_vars <- base::intersect(names(xsample), names(xpop))
   
   # creating the design matrix for entire xsample
   xsample_d <- model.matrix(~., data = data.frame(xsample[common_pred_vars]))
@@ -247,53 +252,66 @@ modifiedGreg <- function(y,
     }
     if (datatype == "totals"){
       
-      # need N for each specific domain
-      # assume they are there?
       xpop_d <- xpop[ ,c("N", common_pred_vars, domain_col_name)]
       
     }
     if (datatype == "means"){
       
-      # need N for each specific domain
-      # assume they are there?
       xpop[common_pred_vars] <- lapply(xpop[common_pred_vars], function(x) x*(xpop$N))
       xpop_d <- cbind(N = xpop$N, xpop[ ,!(names(xpop) %in% "N")])
       
     }
     
+    weight_mat <- diag(weight, nrow = length(weight))
+    
     # computing the pieces that remain the same across all domains
-    constant_component1 <- solve(xsample_dt %*% diag(weight) %*% xsample_d)
+    # outsource to cpp
+    constant_component1 <- const_comp1(xsample_d, weight_mat)
     constant_component2 <- t(weight * xsample_d)
-    betas <- solve(xsample_dt %*% diag(weight) %*% xsample_d) %*% (xsample_dt) %*% diag(weight) %*% y
+    betas <- get_coefs(xsample_d, as.vector(y), weight_mat)
+    names(betas) <- colnames(xsample_d)
     
     # internal function to compute estimates by domain
     by_domain_linear <- function(domain_id) {
 
       domain_indic_vec <- as.integer(xsample[domain_col_name] == domain_id)
-
+      
       xpop_domain <- xpop_d[xpop_d[domain_col_name] == domain_id, , drop = FALSE]
       xpop_d_domain <- unlist(xpop_domain[-which(names(xpop_domain) == domain_col_name)])
       xsample_domain <- xsample[xsample[domain_col_name] == domain_id, , drop = FALSE]
+      
       xsample_d_domain <- model.matrix(~., data = data.frame(xsample_domain[common_pred_vars]))
+      
       xsample_dt_domain <- t(xsample_d_domain)
       weights_domain <- weight[which(domain_indic_vec == 1)]
-
-      w <- as.matrix(
-        weight*domain_indic_vec + (
-        t(as.matrix(xpop_d_domain) - xsample_dt_domain %*% weights_domain) %*%
-          constant_component1
-        ) %*%
-        constant_component2
-        )
       
-      t <- w %*% y
+      xpop_cpp_domain <- as.matrix(xpop_d_domain)
+      weight_mat_domain <- diag(weights_domain, nrow = length(weights_domain))
+      weighted_indic_mat <- matrix(weight * domain_indic_vec, nrow = 1)
+      
+      w <- get_weights_modGreg(xpop_cpp_domain,
+                               xsample_d_domain,
+                               weight_mat_domain,
+                               constant_component1,
+                               constant_component2,
+                               weighted_indic_mat)
+      
+
+      t <- sum(as.numeric(w) * y)
       
       domain_N <- unlist(xpop_domain["N"])
-    
-      if(var_est == TRUE) {
+      
+      if (var_est == TRUE) {
         
-        if(var_method != "bootstrapSRS") {
+        if (nrow(xsample_domain) < 2) {
           
+          if (messages) {
+            message(paste0("Domain ", domain_id, " does not contain enough points for variance estimation"))
+          }
+          varEst <- NA
+          
+        } else if (var_method != "bootstrapSRS") {
+        
           y_hat <- xsample_d_domain %*% betas
           y_domain <- y[which(domain_indic_vec == 1)]
           e <- y_domain - y_hat
@@ -379,7 +397,13 @@ modifiedGreg <- function(y,
       t <- t(y_domain - y_hats_s) %*% weights_domain + sum(y_hats_U)
       
       if (var_est == TRUE) {
-        if (var_method != "bootstrapSRS") {
+        
+        if (nrow(xsample_domain) < 1) {
+          if (messages) {
+            message(paste0("Domain ", domain_id, " does not contain enought points for variance estimation"))
+          }
+          varEst <- NA
+        } else if (var_method != "bootstrapSRS") {
           
           e <- y_domain - y_hats_s
           varEst <- varMase(y = e, pi = pi[which(domain_indic_vec == 1)], pi2 = pi2, method = var_method, N = domain_N)
@@ -440,9 +464,9 @@ modifiedGreg <- function(y,
       )
     )
   ) |>
-    colSums()
+    colSums(na.rm = TRUE)
   
-  return(list(res, pop_res))
+  return(list(population_res = pop_res, raw_res = res))
   
 }
 
